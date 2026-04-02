@@ -1,0 +1,24 @@
+[project]
+name = "ingeinnova-backend"
+version = "0.1.0"
+description = "Servidor de Control y Gestión - INGEINNOVA"
+readme = "README.md"
+requires-python = ">=3.12"
+
+# Dependencias de PRODUCCIÓN (Lo que corre en el servidor)
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy",
+    "pydantic>=2.0",
+    "python-multipart",
+    "pydantic-settings",
+]
+
+# Dependencias de DESARROLLO (Lo que usas para testear)
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "httpx>=0.28.1",
+    "mypy>=1.20.0",
+]
