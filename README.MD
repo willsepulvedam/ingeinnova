@@ -9,9 +9,10 @@ Plataforma de emprendimiento de la **Universidad de Colombia — Unicolombo**. S
 INGEINNOVA está construido bajo una arquitectura de **microservicios**, donde cada servicio es independiente, se despliega por separado y se comunica a través de HTTP.
 ```
 INGEINNOVA/
-├── backend/       # API REST — FastAPI + Python 3.12
-├── frontend/      # Interfaz de usuario — React 19 + Vite 8
-└── docker-compose.yml  # Orquestador de servicios
+├── backend/            # API REST — FastAPI + Python 3.12
+├── frontend/           # Interfaz de usuario — React 19 + Vite 8
+├── docker-compose.yml  # Orquestador de servicios
+└── .env.example        # Variables de entorno de ejemplo
 ```
 
 ### Backend
@@ -19,6 +20,9 @@ API REST construida con **FastAPI** y **Python 3.12**. Gestiona la lógica de ne
 
 ### Frontend
 Interfaz de usuario construida con **React 19** y **Vite 8**. Organizada por componentes, páginas y servicios. Se comunica con el backend a través de la capa de servicios.
+
+### Base de datos
+**PostgreSQL 16** corriendo en contenedor Docker. Los datos persisten en un volumen local aunque se apaguen los contenedores.
 
 ### Infraestructura
 Cada servicio corre en su propio contenedor Docker. No se necesita instalar Python ni Node.js en la máquina local — solo Docker.
@@ -29,10 +33,8 @@ Cada servicio corre en su propio contenedor Docker. No se necesita instalar Pyth
 
 | Nombre | Rol | GitHub |
 |--------|-----|--------|
-|        |     |        |
-|        |     |        |
-|        |     |        |
-|        |     |        |
+| Samuel Vargas | ML Engineer | [@shinji585](https://github.com/shinji585) |
+| Will Sepúlveda | Frontend Developer | [@willsepulvedam](https://github.com/willsepulvedam) |
 
 ---
 
@@ -49,6 +51,12 @@ Cada servicio corre en su propio contenedor Docker. No se necesita instalar Pyth
 git clone https://github.com/tu-org/ingeinnova.git
 cd INGEINNOVA
 
+# Configurar variables de entorno
+cp .env.example .env
+
+# Levantar la base de datos
+docker compose up db
+
 # Levantar el backend
 docker compose up backend
 
@@ -64,6 +72,25 @@ Una vez levantados los servicios:
 - **Frontend** → http://localhost:5173
 - **Backend** → http://localhost:8000
 - **Documentación API** → http://localhost:8000/docs
+
+---
+
+## Variables de entorno
+
+Copia el archivo `.env.example` y renómbralo a `.env`:
+```bash
+cp .env.example .env
+```
+
+El archivo `.env.example` contiene:
+```env
+POSTGRES_USER=ingeinnova
+POSTGRES_PASSWORD=ingeinnova
+POSTGRES_DB=ingeinnova
+DATABASE_URL=postgresql://ingeinnova:ingeinnova@db:5432/ingeinnova
+```
+
+> El `.env` nunca se sube a git. En producción reemplaza las credenciales por unas seguras.
 
 ---
 
