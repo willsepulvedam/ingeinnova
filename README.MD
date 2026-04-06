@@ -146,3 +146,8 @@ docker compose up frontend --build
 |------|-------------|
 | `main` | Código de producción |
 | `demo` | Demo standalone para presentaciones |
+
+
+## Nota: 
+cada desarrollador copia el .env.example y llena sus valores de la forma: 
+cp .env.example .env
