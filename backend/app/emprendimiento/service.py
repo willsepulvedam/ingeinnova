@@ -7,7 +7,7 @@ from backend.app.etapa.enums import EstadoEtapa
 from backend.app.etapa.model import Etapa
 from backend.app.ruta.model import Ruta
 
-class EmpredimientoService:
+class EmprendimientoService:
     
     #TODO: Implementar métodos para crear, obtener, listar, actualizar y eliminar emprendimientos
     

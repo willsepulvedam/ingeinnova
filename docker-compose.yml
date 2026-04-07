@@ -10,18 +10,20 @@ services:
       - /app/node_modules
 
   backend:
-    depends_on:
-      db:
-        condition: service_healthy
     build:
       context: ./backend
       dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=${DATABASE_URL}
-    depends_on:
-      - db
+      - PYTHONPATH=/app
+    volumes:
+      - ./backend:/app/backend
+      - /app/backend/venv
 
   db:
     image: postgres:16-alpine

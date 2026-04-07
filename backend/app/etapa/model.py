@@ -8,7 +8,7 @@ from backend.app.etapa.enums import EstadoEtapa
 
 
 class Etapa(SQLModel, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     ruta_id: uuid.UUID = Field(foreign_key="ruta.id")
     nombre: str = Field(..., description="Nombre de la etapa", max_length=100)
     estado: EstadoEtapa = Field(
