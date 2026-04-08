@@ -1,7 +1,10 @@
 from sqlmodel import SQLModel, create_engine, Session
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://ingeinnova:ingeinnova@localhost:5432/ingeinnova")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg://ingeinnova:ingeinnova@localhost:5432/ingeinnova",
+)
 engine = create_engine(DATABASE_URL, echo=True)
 
 

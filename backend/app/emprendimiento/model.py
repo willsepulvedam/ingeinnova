@@ -14,5 +14,5 @@ class Emprendimiento(SQLModel, table=True):
     )
     fecha_creacion: datetime = Field(default_factory=datetime.now)
     estado: EstadoEmprendimiento = Field(
-        default=EstadoEmprendimiento.INACTIVO, description="Estado del emprendimiento"
+        default=EstadoEmprendimiento.ACTIVO, description="Estado del emprendimiento"
     )

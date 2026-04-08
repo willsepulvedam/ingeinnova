@@ -10,10 +10,13 @@ service = RutaService()
 
 @router.get("/{emprendimiento_id}", response_model=Ruta)
 async def obtener(emprendimiento_id: UUID, session: Session = Depends(get_session)):
-    return service.obtener(emprendimiento_id, session)
+    ruta = service.obtener(emprendimiento_id, session)
+    if not ruta:
+        raise HTTPException(status_code=404, detail="Ruta no encontrada")
+    return ruta
 
 @router.post("/{ruta_id}/avanzar", response_model=Ruta)
-async def crear_ruta(ruta_id: UUID,ruta: Ruta, session: Session = Depends(get_session)):
+async def avanzar(ruta_id: UUID, session: Session = Depends(get_session)):
     try:
         return service.avanzar_etapa(ruta_id, session)
     except ValueError as e:
@@ -21,7 +24,7 @@ async def crear_ruta(ruta_id: UUID,ruta: Ruta, session: Session = Depends(get_se
     
 
 @router.get("/{ruta_id}/progreso", response_model=Ruta)
-async def obtener_ruta(ruta_id: UUID, session: Session = Depends(get_session)):
+async def obtener_progreso(ruta_id: UUID, session: Session = Depends(get_session)):
     try:
         return service.obtener_progreso(ruta_id, session)
     except ValueError as e:
