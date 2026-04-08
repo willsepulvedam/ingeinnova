@@ -23,7 +23,7 @@ services:
       - PYTHONPATH=/app
     volumes:
       - ./backend:/app/backend
-      - /app/backend/venv
+      - /app/backend/.venv
 
   db:
     image: postgres:16-alpine

@@ -30,7 +30,7 @@ async def actualizar(emprendimiento_id: UUID, emprendimiento: EmprendimientoUpda
         raise HTTPException(status_code=404, detail="Emprendimiento no encontrado")
     return db_emprendimiento
 
-@router.delete("/{emprendimiento_id}", status_code=204)
+@router.delete("/{emprendimiento_id}", response_model=dict)
 async def eliminar(emprendimiento_id: UUID, session: Session = Depends(get_session)) -> dict:
     success = service.eliminar(emprendimiento_id, session)
     if not success:
