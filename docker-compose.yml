@@ -8,7 +8,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-
   backend:
     build:
       context: ./backend
@@ -24,7 +23,6 @@ services:
     volumes:
       - ./backend:/app/backend
       - /app/backend/.venv
-
   db:
     image: postgres:16-alpine
     healthcheck:
@@ -41,6 +39,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
 volumes:
   postgres_data:
