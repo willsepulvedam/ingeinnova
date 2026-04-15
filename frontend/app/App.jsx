@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Phases from './pages/Phases'
 import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
+import EmprendimientoDetail from './pages/emprendimientoDetail'
 import { SidebarNavigationDualTierDemo } from './components/SidebarNavigationDualTierDemo'
 
 function App() {
@@ -31,7 +32,7 @@ function App() {
                 ☰
               </button>
               <h1 className="text-white text-2xl font-bold">INGEINNOVA</h1>
-              <div className="w-12" /> {/* Espaciador para centrar el título */}
+              <div className="w-12" />
             </div>
           </div>
         </nav>
@@ -67,6 +68,8 @@ function App() {
         <main className="pt-4">
           <Routes>
             <Route path="/" element={<Home />} />
+            {/* Ruta dinámica para detalle de emprendimiento (etapas + progreso) */}
+            <Route path="/emprendimiento/:id" element={<EmprendimientoDetail />} />
             <Route path="/phases" element={<Phases />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />

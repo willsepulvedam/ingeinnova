@@ -1,126 +1,176 @@
-import { H1, H2, H3, H4, Subtitle, BodyText } from '../components/Typography'
-import { ButtonPrimary, ButtonSecondary } from '../components/Button'
-import { Card, CardHighlight, CardBody } from '../components/Card'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { emprendimientoService } from '../services/EmprendimientoService'
 
-function Home() {
-  const features = [
-    { number: '1', title: 'Mentoría', desc: 'Expertos en negocio guiando tu camino' },
-    { number: '2', title: 'Talleres', desc: 'Formación práctica y actualizada' },
-    { number: '3', title: 'Networking', desc: 'Conexiones valiosas con emprendedores' },
-    { number: '4', title: 'Recursos', desc: 'Herramientas necesarias para el éxito' }
-  ]
+const ESTADO_BADGE = {
+  ACTIVO: 'bg-green-100 text-green-700',
+  INACTIVO: 'bg-gray-100 text-gray-500',
+}
+
+/** UUID aleatorio simple para propietario_id mientras no hay auth. */
+function randomUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+
+const PROPIETARIO_ID =
+  localStorage.getItem('propietario_id') ??
+  (() => {
+    const id = randomUUID()
+    localStorage.setItem('propietario_id', id)
+    return id
+  })()
+
+export default function Home() {
+  const navigate = useNavigate()
+  const [emprendimientos, setEmprendimientos] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ nombre: '', descripcion: '' })
+  const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState(null)
+
+  const cargar = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await emprendimientoService.listar()
+      setEmprendimientos(data)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { cargar() }, [])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    setFormError(null)
+    try {
+      await emprendimientoService.crear({
+        nombre: form.nombre.trim(),
+        descripcion: form.descripcion.trim(),
+        propietario_id: PROPIETARIO_ID,
+      })
+      setForm({ nombre: '', descripcion: '' })
+      setShowForm(false)
+      await cargar()
+    } catch (e) {
+      setFormError(e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20 pb-32">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <div>
-              <H1 className="mb-6">
-                Emprende,
-                <span className="text-blue-600"> Innova,</span>
-                <span className="text-orange-500"> Crece</span>
-              </H1>
-              <Subtitle className="mb-8 text-gray-700">
-                En Ingeinnova transformamos tus ideas en empresas exitosas. Acompañamos 
-                emprendimientos seleccionados a través de 4 fases de desarrollo intensivo.
-              </Subtitle>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <ButtonPrimary>Comenzar Ahora</ButtonPrimary>
-                <ButtonSecondary>Saber Más</ButtonSecondary>
-              </div>
-            </div>
-
-            {/* Right Image */}
-            <div className="relative">
-              <div className="absolute -top-10 -right-10 w-64 h-64 bg-orange-200 rounded-full blur-3xl opacity-30"></div>
-              <div className="relative bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl shadow-2xl overflow-hidden h-96 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">🚀</div>
-                  <p className="text-gray-700 font-semibold">Imagen de emprendimiento</p>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div className="container mx-auto px-4 md:px-8 py-8 max-w-4xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Emprendimientos</h1>
+          <p className="text-gray-500 mt-1">Gestiona tus proyectos de emprendimiento</p>
         </div>
-      </section>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold transition"
+        >
+          {showForm ? 'Cancelar' : '+ Nuevo'}
+        </button>
+      </div>
 
-      {/* Mission & Vision Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Mission */}
-            <CardHighlight className="border-l-4 border-blue-600 p-8 rounded-xl">
-              <CardBody className="p-0">
-                <div className="w-14 h-14 bg-blue-600 rounded-lg mb-6 flex items-center justify-center text-2xl">
-                  🎯
-                </div>
-                <H3 className="mb-4">Nuestra Misión</H3>
-                <BodyText className="text-gray-700">
-                  Impulsar la innovación y el emprendimiento, transformando ideas brillantes 
-                  en empresas sostenibles que generen impacto positivo en la sociedad.
-                </BodyText>
-              </CardBody>
-            </CardHighlight>
-
-            {/* Vision */}
-            <CardHighlight className="border-l-4 border-orange-500 p-8 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100">
-              <CardBody className="p-0">
-                <div className="w-14 h-14 bg-orange-500 rounded-lg mb-6 flex items-center justify-center text-2xl">
-                  🌟
-                </div>
-                <H3 className="mb-4">Nuestra Visión</H3>
-                <BodyText className="text-gray-700">
-                  Ser el ecosistema de emprendimiento más confiable e inclusivo, creando 
-                  oportunidades para que emprendedores se conviertan en líderes empresariales.
-                </BodyText>
-              </CardBody>
-            </CardHighlight>
+      {/* Formulario de creación */}
+      {showForm && (
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white border border-blue-100 rounded-xl p-6 mb-8 shadow-sm"
+        >
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Nuevo emprendimiento</h2>
+          {formError && (
+            <p className="text-red-600 text-sm mb-3 bg-red-50 p-3 rounded-lg">{formError}</p>
+          )}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nombre <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              maxLength={100}
+              required
+              value={form.nombre}
+              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+              placeholder="Ej: TechFood Solutions"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="text-center mb-16">
-            <H2 className="mb-4">Por qué elegir Ingeinnova</H2>
-            <Subtitle className="text-gray-600 max-w-2xl mx-auto">
-              Acompañamiento integral a través de 4 fases estructuradas diseñadas para el éxito
-            </Subtitle>
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Descripción <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              rows={3}
+              maxLength={500}
+              required
+              value={form.descripcion}
+              onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+              placeholder="Describe brevemente tu emprendimiento..."
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, idx) => (
-              <Card key={idx} className="bg-white p-8 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
-                  {feature.number}
-                </div>
-                <H4 className="mb-2">{feature.title}</H4>
-                <BodyText className="text-gray-600">{feature.desc}</BodyText>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="container mx-auto px-4 md:px-8 text-center">
-          <H2 className="text-white mb-6">¿Listo para transformar tu idea en realidad?</H2>
-          <Subtitle className="text-white max-w-2xl mx-auto mb-8">
-            Únete a nuestra comunidad de emprendedores y accede a las herramientas, 
-            mentoría y red de contactos que necesitas.
-          </Subtitle>
-          <button className="bg-white text-blue-600 px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-200 active:scale-95">
-            Solicitar Participación
+          <button
+            type="submit"
+            disabled={saving}
+            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2 rounded-lg font-semibold transition"
+          >
+            {saving ? 'Creando...' : 'Crear emprendimiento'}
           </button>
+        </form>
+      )}
+
+      {/* Lista */}
+      {loading && (
+        <div className="text-center py-16 text-gray-500">Cargando emprendimientos...</div>
+      )}
+      {error && (
+        <div className="bg-red-50 text-red-700 p-4 rounded-xl mb-4">
+          Error: {error}
+          <button onClick={cargar} className="ml-3 underline text-sm">Reintentar</button>
         </div>
-      </section>
+      )}
+      {!loading && !error && emprendimientos.length === 0 && (
+        <div className="text-center py-16 text-gray-400">
+          <div className="text-5xl mb-3">🚀</div>
+          <p>Aún no tienes emprendimientos. ¡Crea el primero!</p>
+        </div>
+      )}
+      <div className="grid gap-4">
+        {emprendimientos.map((emp) => (
+          <div
+            key={emp.id}
+            onClick={() => navigate(`/emprendimiento/${emp.id}`)}
+            className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-blue-300 cursor-pointer transition"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">{emp.nombre}</h3>
+                <p className="text-gray-500 text-sm mt-1 line-clamp-2">{emp.descripcion}</p>
+              </div>
+              <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${ESTADO_BADGE[emp.estado] ?? 'bg-gray-100 text-gray-500'}`}>
+                {emp.estado}
+              </span>
+            </div>
+            <p className="text-xs text-gray-400 mt-3">
+              Creado: {new Date(emp.fecha_creacion).toLocaleDateString('es-CO')}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
-
-export default Home

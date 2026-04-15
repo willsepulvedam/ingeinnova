@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom'
 export function SidebarNavigationDualTierDemo({ onItemClick }) {
   const menuItems = [
     { label: 'Inicio', path: '/', icon: '🏠' },
-    { label: 'Fases', path: '/phases', icon: '📋' },
+    { label: 'Etapas', path: '/phases', icon: '📋' },
     { label: 'Perfil', path: '/profile', icon: '👤' },
   ]
 
   return (
-    <nav className="h-full flex flex-col p-6 bg-blue-600 text-white overflow-y-auto">
+    <nav className="h-full flex flex-col p-6 bg-gradient-to-r from-blue-700 to-blue-900 text-white overflow-y-auto">
       {/* Header del menú */}
-      <div className="mb-8 pb-6 border-b border-blue-500">
+      <div className="mb-8 pb-6 border-b bg-gradient-to-r from-blue-700 to-blue-900">
         <h2 className="text-lg font-bold">Menú</h2>
         <p className="text-sm text-blue-100">Navega por la plataforma</p>
       </div>
