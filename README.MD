@@ -84,10 +84,12 @@ cp .env.example .env
 
 El archivo `.env.example` contiene:
 ```env
+PGADMIN_EMAIL=admin@admin.com
+PGADMIN_PASSWORD=admin
 POSTGRES_USER=ingeinnova
 POSTGRES_PASSWORD=ingeinnova
 POSTGRES_DB=ingeinnova
-DATABASE_URL=postgresql://ingeinnova:ingeinnova@db:5432/ingeinnova
+DATABASE_URL=postgresql+psycopg://ingeinnova:ingeinnova@db:5432/ingeinnova
 ```
 
 > El `.env` nunca se sube a git. En producción reemplaza las credenciales por unas seguras.
