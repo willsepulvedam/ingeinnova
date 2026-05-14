@@ -5,7 +5,7 @@ description = "Servidor de Control y Gestión - INGEINNOVA"
 readme = "README.md"
 requires-python = ">=3.12"
 
-# Dependencias de PRODUCCIÓN (Lo que corre en el servidor)
+
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
@@ -14,13 +14,17 @@ dependencies = [
     "python-multipart",
     "pydantic-settings",
     "psycopg[binary]>=3.3.3",
+    "sqlmodel>=0.0.22",  # Movélo para acá
+    "passlib[bcrypt]>=1.7.4",
+    "pydantic-extra-types>=2.11.1",
+    "phonenumbers>=9.0.30",
 ]
 
-# Dependencias de DESARROLLO (Lo que usas para testear)
+
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
     "httpx>=0.28.1",
     "mypy>=1.20.0",
-    "sqlmodel>=0.0.38",
+    "ruff>=0.15.12",
 ]
