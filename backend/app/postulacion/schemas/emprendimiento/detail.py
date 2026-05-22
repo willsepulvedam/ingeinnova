@@ -5,15 +5,17 @@ from sqlmodel._compat import SQLModelConfig
 from sqlmodel import Field
 import uuid
 
+from backend.app.etapa.schemas.out import EtapaOut
 from backend.app.postulacion.schemas.detalles_emprendimiento.out import DetallesEmpOut
 from backend.app.postulacion.schemas.emprendimiento.base import EmprendimientoBase
+from backend.app.ruta.schemas.out import RutaOut
 
 
 class EmprendimientoDetail(EmprendimientoBase):
     id: uuid.UUID
     detalles: DetallesEmpOut | None = None
-    etapa_actual: EtapaOut | None = None  # type: ignore # noqa: F821
-    rutas: Annotated[list[RutaOut], Field(default_factory=list)]  # type: ignore # noqa: F821
+    etapa_actual: EtapaOut | None = None
+    rutas: Annotated[list[RutaOut], Field(default_factory=list)]
     tutor_assigned_name: Annotated[
         str, Field(description="Indica si el emprendimiento tiene un tutor asignado")
     ]
@@ -55,18 +57,32 @@ class EmprendimientoDetail(EmprendimientoBase):
                     "redes_sociales": "@ecotech_oficial",
                 },
                 "etapa_actual": {
-                    "nombre": "Validación de mercado",
-                    "descripcion": "Actualmente validando el producto con clientes potenciales.",
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "nombre": "Etapa 1: Revisión de documentos",
+                    "descripcion": "En esta etapa se revisarán los documentos presentados por los postulantes para verificar que cumplan con los requisitos mínimos.",
+                    "estado": "Pendiente",
+                    "fecha_inicio": "2026-04-01T00:00:00Z",
+                    "fecha_fin": "2026-07-15T23:59:59Z",
                 },
                 "rutas": [
                     {
-                        "nombre": "Ruta de Emprendimiento",
-                        "descripcion": "Ruta general para emprendimientos en etapa de prototipo.",
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "estado": "Activa",
+                        "fecha_inicio": "2026-05-01T00:00:00Z",
+                        "fecha_final": "2026-08-31T23:59:59Z",
+                        "tipo": "Aceleración",
+                        "contenido": "Mentorías personalizadas enfocadas en tracción comercial y levantamiento de capital.",
+                        "entrega": "Documento de validación de mercado en PDF y el mockup del MVP.",
                     },
                     {
-                        "nombre": "Ruta de Tecnología",
-                        "descripcion": "Ruta especializada para emprendimientos tecnológicos.",
-                    },
+                        "id": "123e4567-e89b-12d3-a456-426614174001",
+                        "estado": "Pendiente",
+                        "fecha_inicio": "2026-09-01T00:00:00Z",
+                        "fecha_final": "2026-12-31T23:59:59Z",
+                        "tipo": "Incubación",
+                        "contenido": "Talleres grupales sobre validación de hipótesis, diseño de modelos de negocio y estrategias de crecimiento.",
+                        "entrega": "Plan de validación de hipótesis en formato PDF.",
+                    }
                 ],
                 "tutor_assigned_name": "María Gómez",
                 "tutor_assigned_status": True,

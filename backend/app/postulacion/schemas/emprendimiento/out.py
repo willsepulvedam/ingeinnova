@@ -4,6 +4,7 @@ from typing import Annotated
 import uuid
 
 
+from backend.app.postulacion.schemas.detalles_emprendimiento.out import DetallesEmpOut
 from backend.app.postulacion.schemas.emprendedor.out import EmprendedorOut
 from backend.app.postulacion.schemas.emprendimiento.base import EmprendimientoBase
 
@@ -16,11 +17,11 @@ class EmprendimientoOut(EmprendimientoBase, table=False):
             description="Lista de emprendedores integrantes del emprendimiento",
             default_factory=list,
         ),
-    ] = []  # type: ignore # noqa: F821
+    ] = []
     detalles: Annotated[
-        DetallesEmpOut | None,  # noqa: F821 # type: ignore
+        DetallesEmpOut | None,
         Field(description="Detalles adicionales del emprendimiento"),
-    ] = None  
+    ] = None
 
     model_config = SQLModelConfig(
         extra="forbid",
@@ -78,9 +79,20 @@ class EmprendimientoOut(EmprendimientoBase, table=False):
                     },
                 ],
                 "detalles": {
-                    "fecha_inicio": "2024-01-15",
-                    "proyeccion_ventas": 50000,
-                    "necesidades": "Asesoría en marketing digital y financiamiento",
+                    "id": "876e4567-e89b-12d3-a456-426614174999",
+                    "constituida_legalmente": "No",
+                    "nit_empresa": None,
+                    "tiene_rut": "No tiene",
+                    "tiene_cvlac": False,
+                    "tiempo_existencia": "Menos de 1 año",
+                    "cantidad_trabajadores": "1-3",
+                    "tipo_negocio": "Producto masivo",
+                    "sector_economico": "Tecnología",
+                    "es_familiar": "No",
+                    "familia_tiene_empresa": "No",
+                    "empresa_familia_legal": "No",
+                    "historial_quiebra": False,
+                    "redes_sociales": "@ecotech_oficial",
                 },
             }
         },
