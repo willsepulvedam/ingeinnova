@@ -7,6 +7,7 @@ from sqlmodel._compat import SQLModelConfig
 from backend.app.postulacion.schemas.detalles_emprendimiento.create import (
     DetallesEmpCreate,
 )
+from backend.app.postulacion.schemas.emprendedor.create import EmprendedorCreate
 from backend.app.postulacion.schemas.emprendimiento.base import EmprendimientoBase
 
 
@@ -15,10 +16,14 @@ class EmprendimientoCreate(EmprendimientoBase, table=False):
         list[uuid.UUID],
         Field(description="IDs de los emprendedores integrantes del emprendimiento"),
     ]
+    emprendedor: Annotated[
+        EmprendedorCreate,
+        Field(description="Datos del emprendedor principal"),
+    ]
     detalles: Annotated[
-        DetallesEmpCreate | None,
+        DetallesEmpCreate,
         Field(description="Detalles adicionales del emprendimiento"),
-    ] = None
+    ]
 
     model_config = SQLModelConfig(
         extra="forbid",

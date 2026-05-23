@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class Tabla_Emprendimiento(EmprendimientoBase, table=True):
     __tablename__ = "tabla_emprendimiento" # type: ignore
 
-    id: uuid.UUID = Field(
+    emprendimiento_id: uuid.UUID = Field(
         default_factory=uuid.uuid4,
         primary_key=True,
         description="ID único del emprendimiento (PK en BD)",
@@ -23,7 +23,7 @@ class Tabla_Emprendimiento(EmprendimientoBase, table=True):
     
     detalles_id: uuid.UUID | None = Field(
         default=None,
-        foreign_key="tabla_detalles_emprendimiento.id",
+        foreign_key="tabla_detalles_emprendimiento.emprendimiento_id",
         description="FK fisica que apunta a la tabla de detalles de emprendimiento",
     )
 

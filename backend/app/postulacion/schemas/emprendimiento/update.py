@@ -1,13 +1,13 @@
 import uuid
 
 from sqlmodel._compat import SQLModelConfig
-from sqlmodel import Field
+from sqlmodel import Field, SQLModel
 from typing import Annotated
-from backend.app.postulacion.schemas.emprendimiento.base import EmprendimientoBase
+from backend.app.postulacion.schemas.emprendedor.update import EmprendedorUpdate
 from backend.app.ruta.schemas.enums.ruta_ingeinnova import RutaIngeinnova
 
 
-class EmprendimientoUpdate(EmprendimientoBase, table=False):
+class EmprendimientoUpdate(SQLModel):
     nom_emprendimiento: Annotated[
         str | None,
         Field(
@@ -24,13 +24,21 @@ class EmprendimientoUpdate(EmprendimientoBase, table=False):
     ] = None
     ruta_inscripcion: Annotated[
         RutaIngeinnova | None, Field(default=None, description="Nuevaruta asignada")
-    ] = None  
+    ] = None
 
     integrantes_ids: Annotated[
         list[uuid.UUID] | None,
         Field(
             default=None,
             description="IDs de los emprendedores integrantes del emprendimiento. Si se proporciona, reemplazará a la lista actual de integrantes.",
+        ),
+    ] = None
+
+    emprendedor: Annotated[
+        EmprendedorUpdate | None,
+        Field(
+            default=None,
+            description="Objecto con los datos actualizados del líder o integrantes principal del emprendimiento",
         ),
     ] = None
 

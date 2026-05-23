@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-from backend.app.etapa.enums.etapa_estado import EstadoEtapaEnum
+from backend.app.etapa.schemas.enums.etapa_estado import EstadoEtapaEnum
 from backend.app.etapa.schemas.base import EtapaBase
 from sqlmodel._compat import SQLModelConfig
 
