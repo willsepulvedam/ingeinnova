@@ -2,6 +2,18 @@ import { useState } from 'react'
 import { H3, BodyText } from './Typography'
 import { ButtonPrimary, ButtonSecondary } from './Button'
 
+const MAX_PERSONAS = 4
+
+const crearPersonaVacia = () => ({
+  categoria: '',
+  nombre_completo: '',
+  cedula: '',
+  correo: '',
+  telefono: '',
+  barrio: '',
+  localidad: '',
+})
+
 /**
  * Formulario multi-paso para inscripción en ruta de emprendimiento INGEINNOVA
  * Captura todos los campos del formulario PDF
@@ -11,13 +23,7 @@ export default function FormularioEmprendimiento({ onSubmit, onCancel, loading =
   const [errors, setErrors] = useState({})
 
   const [form, setForm] = useState({
-    // Datos del emprendedor
-    categoria: '',
-    nombre_completo: '',
-    correo: '',
-    telefono: '',
-    barrio: '',
-    localidad: '',
+    personas: [crearPersonaVacia()],
 
     // Datos académicos
     semestre: '',
@@ -46,30 +52,86 @@ export default function FormularioEmprendimiento({ onSubmit, onCancel, loading =
   })
 
   const totalPasos = 4
+  const categoriaPrincipal = form.personas[0]?.categoria ?? ''
+
+  const errorKeyPersona = (index, campo) => `persona_${index}_${campo}`
+
+  const validarCedula = (cedula) => /^\d{6,12}$/.test(cedula.replace(/\s/g, ''))
+
+  const agregarPersona = () => {
+    if (form.personas.length >= MAX_PERSONAS) return
+    setForm({ ...form, personas: [...form.personas, crearPersonaVacia()] })
+  }
+
+  const eliminarPersona = (index) => {
+    if (form.personas.length <= 1) return
+    const personas = form.personas.filter((_, i) => i !== index)
+    setForm({ ...form, personas })
+    const nuevosErrores = { ...errors }
+    Object.keys(nuevosErrores).forEach((key) => {
+      if (key.startsWith(`persona_${index}_`)) delete nuevosErrores[key]
+    })
+    setErrors(nuevosErrores)
+  }
+
+  const actualizarPersona = (index, campo, valor) => {
+    const personas = form.personas.map((p, i) =>
+      i === index ? { ...p, [campo]: valor } : p
+    )
+    setForm({ ...form, personas })
+    const key = errorKeyPersona(index, campo)
+    if (errors[key]) {
+      setErrors({ ...errors, [key]: '' })
+    }
+  }
 
   // Validación de campos por paso
   const validarPaso = (numeroPaso) => {
     const nuevosErrores = {}
 
     if (numeroPaso === 1) {
-      if (!form.categoria) nuevosErrores.categoria = 'Selecciona una categoría'
-      if (!form.nombre_completo?.trim()) nuevosErrores.nombre_completo = 'El nombre es requerido'
-      if (!form.correo?.trim()) nuevosErrores.correo = 'El correo es requerido'
-      if (form.correo && !form.correo.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        nuevosErrores.correo = 'Correo inválido'
-      }
-      if (!form.telefono?.trim()) nuevosErrores.telefono = 'El teléfono es requerido'
-      if (!form.localidad) nuevosErrores.localidad = 'Selecciona una localidad'
+      form.personas.forEach((persona, index) => {
+        if (!persona.categoria) {
+          nuevosErrores[errorKeyPersona(index, 'categoria')] = 'Selecciona una categoría'
+        }
+        if (!persona.nombre_completo?.trim()) {
+          nuevosErrores[errorKeyPersona(index, 'nombre_completo')] = 'El nombre es requerido'
+        }
+        if (!persona.cedula?.trim()) {
+          nuevosErrores[errorKeyPersona(index, 'cedula')] = 'La cédula es requerida'
+        } else if (!validarCedula(persona.cedula)) {
+          nuevosErrores[errorKeyPersona(index, 'cedula')] = 'Ingresa una cédula válida (solo números, 6 a 12 dígitos)'
+        }
+        if (!persona.correo?.trim()) {
+          nuevosErrores[errorKeyPersona(index, 'correo')] = 'El correo es requerido'
+        } else if (!persona.correo.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          nuevosErrores[errorKeyPersona(index, 'correo')] = 'Correo inválido'
+        }
+        if (!persona.telefono?.trim()) {
+          nuevosErrores[errorKeyPersona(index, 'telefono')] = 'El teléfono es requerido'
+        }
+        if (!persona.localidad) {
+          nuevosErrores[errorKeyPersona(index, 'localidad')] = 'Selecciona una localidad'
+        }
+      })
+
+      const cedulas = form.personas.map((p) => p.cedula?.trim()).filter(Boolean)
+      const cedulasDuplicadas = cedulas.filter((c, i) => cedulas.indexOf(c) !== i)
+      form.personas.forEach((persona, index) => {
+        if (persona.cedula?.trim() && cedulasDuplicadas.includes(persona.cedula.trim())) {
+          nuevosErrores[errorKeyPersona(index, 'cedula')] = 'Esta cédula ya fue registrada en otra persona'
+        }
+      })
     }
 
     if (numeroPaso === 2) {
-      if (!form.semestre && form.categoria === 'Estudiante') {
+      if (!form.semestre && categoriaPrincipal === 'Estudiante') {
         nuevosErrores.semestre = 'Selecciona el semestre'
       }
-      if (!form.programa && form.categoria !== 'Administrativo') {
+      if (!form.programa && categoriaPrincipal !== 'Administrativo') {
         nuevosErrores.programa = 'Selecciona el programa'
       }
-      if (!form.jornada && form.categoria !== 'Administrativo') {
+      if (!form.jornada && categoriaPrincipal !== 'Administrativo') {
         nuevosErrores.jornada = 'Selecciona la jornada'
       }
     }
@@ -136,7 +198,7 @@ export default function FormularioEmprendimiento({ onSubmit, onCancel, loading =
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 md:p-8 shadow-lg">
+    <div className="bg-white border border-gray-200 rounded-xl p-6 md:p-8 shadow-lg transition-shadow duration-300 hover:shadow-xl">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -146,126 +208,193 @@ export default function FormularioEmprendimiento({ onSubmit, onCancel, loading =
           </span>
         </div>
         {/* Barra de progreso */}
-        <div className="w-full bg-gray-100 rounded-full h-2">
+        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
           <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            className="bg-blue-600 h-2 rounded-full progress-bar-animated"
             style={{ width: `${(paso / totalPasos) * 100}%` }}
           />
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
-        {/* PASO 1: Datos del Emprendedor */}
+        {/* PASO 1: Datos de las personas (hasta 4) */}
         {paso === 1 && (
-          <div className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Categoría <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="categoria"
-                value={form.categoria}
-                onChange={handleChangeSelect}
-                className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
-                  errors.categoria ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                }`}
+          <div className="space-y-6">
+            <BodyText className="text-blue-600">
+              Registra a las personas del equipo. Puedes agregar hasta {MAX_PERSONAS} integrantes.
+            </BodyText>
+
+            {form.personas.map((persona, index) => (
+              <div
+                key={index}
+                className="border border-gray-200 rounded-xl p-5 bg-gray-50/80 space-y-4 transition-all duration-300 hover:border-blue-200 hover:shadow-md"
               >
-                <option value="">-- Selecciona --</option>
-                <option value="Estudiante">Estudiante</option>
-                <option value="Egresado">Egresado</option>
-                <option value="Administrativo">Administrativo</option>
-              </select>
-              {renderCampoError('categoria')}
-            </div>
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="font-semibold text-gray-900">
+                    Persona {index + 1}
+                    {index === 0 && (
+                      <span className="ml-2 text-xs font-normal text-blue-600">(contacto principal)</span>
+                    )}
+                  </h4>
+                  {form.personas.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => eliminarPersona(index)}
+                      className="text-sm text-red-600 hover:text-red-700 font-medium"
+                    >
+                      Quitar
+                    </button>
+                  )}
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre Completo <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="nombre_completo"
-                value={form.nombre_completo}
-                onChange={handleChangeInput}
-                placeholder="Ej: Juan Carlos Pérez García"
-                maxLength={100}
-                className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
-                  errors.nombre_completo ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                }`}
-              />
-              {renderCampoError('nombre_completo')}
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Categoría <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={persona.categoria}
+                    onChange={(e) => actualizarPersona(index, 'categoria', e.target.value)}
+                    className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
+                      errors[errorKeyPersona(index, 'categoria')]
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                  >
+                    <option value="">-- Selecciona --</option>
+                    <option value="Estudiante">Estudiante</option>
+                    <option value="Egresado">Egresado</option>
+                    <option value="Administrativo">Administrativo</option>
+                  </select>
+                  {renderCampoError(errorKeyPersona(index, 'categoria'))}
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Correo Electrónico <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                name="correo"
-                value={form.correo}
-                onChange={handleChangeInput}
-                placeholder="tu.email@unicolombo.edu.co"
-                className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
-                  errors.correo ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                }`}
-              />
-              {renderCampoError('correo')}
-            </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nombre completo <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={persona.nombre_completo}
+                      onChange={(e) => actualizarPersona(index, 'nombre_completo', e.target.value)}
+                      placeholder="Ej: Juan Carlos Pérez García"
+                      maxLength={100}
+                      className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
+                        errors[errorKeyPersona(index, 'nombre_completo')]
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`}
+                    />
+                    {renderCampoError(errorKeyPersona(index, 'nombre_completo'))}
+                  </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Número de Contacto <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                name="telefono"
-                value={form.telefono}
-                onChange={handleChangeInput}
-                placeholder="3001234567"
-                className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
-                  errors.telefono ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                }`}
-              />
-              {renderCampoError('telefono')}
-            </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Cédula <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={persona.cedula}
+                      onChange={(e) =>
+                        actualizarPersona(index, 'cedula', e.target.value.replace(/\D/g, ''))
+                      }
+                      placeholder="Ej: 1234567890"
+                      maxLength={12}
+                      className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
+                        errors[errorKeyPersona(index, 'cedula')]
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`}
+                    />
+                    {renderCampoError(errorKeyPersona(index, 'cedula'))}
+                  </div>
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Barrio Donde Resides
-              </label>
-              <input
-                type="text"
-                name="barrio"
-                value={form.barrio}
-                onChange={handleChangeInput}
-                placeholder="Ej: Centro"
-                maxLength={50}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Correo electrónico <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={persona.correo}
+                    onChange={(e) => actualizarPersona(index, 'correo', e.target.value)}
+                    placeholder="tu.email@unicolombo.edu.co"
+                    className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
+                      errors[errorKeyPersona(index, 'correo')]
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                  />
+                  {renderCampoError(errorKeyPersona(index, 'correo'))}
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Localidad Donde Resides <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="localidad"
-                value={form.localidad}
-                onChange={handleChangeSelect}
-                className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
-                  errors.localidad ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                }`}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Número de contacto <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={persona.telefono}
+                    onChange={(e) => actualizarPersona(index, 'telefono', e.target.value)}
+                    placeholder="3001234567"
+                    className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
+                      errors[errorKeyPersona(index, 'telefono')]
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                  />
+                  {renderCampoError(errorKeyPersona(index, 'telefono'))}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Barrio donde resides
+                  </label>
+                  <input
+                    type="text"
+                    value={persona.barrio}
+                    onChange={(e) => actualizarPersona(index, 'barrio', e.target.value)}
+                    placeholder="Ej: Centro"
+                    maxLength={50}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Localidad donde resides <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={persona.localidad}
+                    onChange={(e) => actualizarPersona(index, 'localidad', e.target.value)}
+                    className={`w-full border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
+                      errors[errorKeyPersona(index, 'localidad')]
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                  >
+                    <option value="">-- Selecciona --</option>
+                    <option value="1">Localidad Histórica y del Caribe Norte</option>
+                    <option value="2">Localidad de la Virgen y Turística</option>
+                    <option value="3">Localidad Industrial y de la Bahía</option>
+                    <option value="Turbaco">Turbaco</option>
+                    <option value="Bayunca">Bayunca</option>
+                  </select>
+                  {renderCampoError(errorKeyPersona(index, 'localidad'))}
+                </div>
+              </div>
+            ))}
+
+            {form.personas.length < MAX_PERSONAS && (
+              <button
+                type="button"
+                onClick={agregarPersona}
+                className="btn-interactive w-full py-3 border-2 border-dashed border-blue-300 text-blue-600 rounded-xl font-semibold hover:bg-blue-50 hover:border-blue-400"
               >
-                <option value="">-- Selecciona --</option>
-                <option value="1">Localidad Histórica y del Caribe Norte</option>
-                <option value="2">Localidad de la Virgen y Turística</option>
-                <option value="3">Localidad Industrial y de la Bahía</option>
-                <option value="Turbaco">Turbaco</option>
-                <option value="Bayunca">Bayunca</option>
-              </select>
-              {renderCampoError('localidad')}
-            </div>
+                + Agregar otra persona ({form.personas.length}/{MAX_PERSONAS})
+              </button>
+            )}
           </div>
         )}
 
@@ -276,7 +405,7 @@ export default function FormularioEmprendimiento({ onSubmit, onCancel, loading =
               Completa la información de tu formación académica
             </BodyText>
 
-            {form.categoria === 'Estudiante' && (
+            {categoriaPrincipal === 'Estudiante' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Semestre <span className="text-red-500">*</span>
@@ -300,7 +429,7 @@ export default function FormularioEmprendimiento({ onSubmit, onCancel, loading =
               </div>
             )}
 
-            {form.categoria !== 'Administrativo' && (
+            {categoriaPrincipal !== 'Administrativo' && (
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -348,7 +477,7 @@ export default function FormularioEmprendimiento({ onSubmit, onCancel, loading =
               </>
             )}
 
-            {form.categoria === 'Egresado' && (
+            {categoriaPrincipal === 'Egresado' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Año de Graduación <span className="text-red-500">*</span>

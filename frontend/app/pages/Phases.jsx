@@ -69,7 +69,7 @@ function Phases() {
           <H1>Administrar Etapas</H1>
           <Subtitle>Visualiza y actualiza las etapas de este emprendimiento. Cada etapa está asociada a una ruta.</Subtitle>
         </div>
-        <Link to="/">
+        <Link to="/dashboard">
           <ButtonSecondary>Volver al panel</ButtonSecondary>
         </Link>
       </div>

@@ -92,10 +92,10 @@ export default function EmprendimientoDetail() {
     <div className="container mx-auto px-4 md:px-8 py-8 max-w-3xl">
       {/* Back */}
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/dashboard')}
         className="text-blue-600 hover:underline text-sm mb-6 flex items-center gap-1"
       >
-        ← Volver a emprendimientos
+        ← Volver al panel
       </button>
 
       {/* Header del emprendimiento */}
@@ -124,7 +124,7 @@ export default function EmprendimientoDetail() {
           </div>
           <div className="w-full bg-gray-100 rounded-full h-3">
             <div
-              className="bg-blue-500 h-3 rounded-full transition-all duration-500"
+              className="bg-blue-500 h-3 rounded-full progress-bar-animated"
               style={{ width: `${progreso.progreso ?? 0}%` }}
             />
           </div>
