@@ -8,3 +8,7 @@
 
 # Entornos
 **/.env
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
