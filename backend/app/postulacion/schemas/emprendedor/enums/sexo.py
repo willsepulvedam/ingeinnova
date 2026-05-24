@@ -1,6 +1,6 @@
-from enum import StrEnum
+from enum import Enum
 
-class GeneroEmprendedor(StrEnum):
+class GeneroEmprendedor(str, Enum):
     MASCULINO = "Masculino"
     FEMENINO = "Femenino"
     OTRO = "Otro"

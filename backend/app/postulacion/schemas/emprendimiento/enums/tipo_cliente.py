@@ -1,6 +1,6 @@
-from enum import StrEnum
+from enum import Enum
 
-class TipoClienteEmprendimiento(StrEnum):
+class TipoClienteEmprendimiento(str, Enum):
     B2C = "B2C - Consumidor Final (Personas)"
     B2B = "B2B - Empresas / Corporativos"
     B2G = "B2G - Gobierno / Entidades Públicas"

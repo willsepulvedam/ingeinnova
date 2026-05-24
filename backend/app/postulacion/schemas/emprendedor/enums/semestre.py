@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class SemestreAcademicoEmprendedor(StrEnum):
+class SemestreAcademicoEmprendedor(str, Enum):
     SEM_1 = "1er sem"
     SEM_2 = "2"
     SEM_3 = "3"

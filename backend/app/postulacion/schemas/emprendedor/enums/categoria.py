@@ -1,6 +1,6 @@
-from enum import StrEnum
+from enum import Enum
 
-class CategoriaEmprendedor(StrEnum):
+class CategoriaEmprendedor(str, Enum):
     ESTUDIANTE = "Estudiante"
     EGRESADO = "Egresado"
     ADMINISTRATIVO = "Administrativo"

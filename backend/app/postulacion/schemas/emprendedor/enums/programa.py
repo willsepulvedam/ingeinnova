@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class ProgramaAcademicoEmprendedor(StrEnum):
+class ProgramaAcademicoEmprendedor(str, Enum):
     INDUSTRIAL = "Ingeniería Industrial"
     SISTEMAS = "Ingeniería de Sistemas"
     DERECHO = "Derecho"

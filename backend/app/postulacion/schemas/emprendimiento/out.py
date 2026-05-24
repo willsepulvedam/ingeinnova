@@ -3,25 +3,35 @@ from sqlmodel import Field
 from typing import Annotated
 import uuid
 
-
 from backend.app.postulacion.schemas.detalles_emprendimiento.out import DetallesEmpOut
 from backend.app.postulacion.schemas.emprendedor.out import EmprendedorOut
 from backend.app.postulacion.schemas.emprendimiento.base import EmprendimientoBase
 
 
 class EmprendimientoOut(EmprendimientoBase, table=False):
-    id: Annotated[uuid.UUID, Field(description="ID del emprendimiento")]
+    id: Annotated[
+        uuid.UUID,
+        Field(
+            description="ID del emprendimiento",
+            validation_alias="emprendimiento_id",
+        ),
+    ]
+
     integrantes: Annotated[
         list[EmprendedorOut],
         Field(
             description="Lista de emprendedores integrantes del emprendimiento",
             default_factory=list,
         ),
-    ] = []
+    ]
+
     detalles: Annotated[
         DetallesEmpOut | None,
-        Field(description="Detalles adicionales del emprendimiento"),
-    ] = None
+        Field(
+            description="Detalles adicionales del emprendimiento",
+            default=None,
+        ),
+    ]
 
     model_config = SQLModelConfig(
         extra="forbid",
@@ -84,7 +94,7 @@ class EmprendimientoOut(EmprendimientoBase, table=False):
                     "nit_empresa": None,
                     "tiene_rut": "No tiene",
                     "tiene_cvlac": False,
-                    "tiempo_existencia": "Menos de 1 año",
+                    "tiempo_existence": "Menos de 1 año",
                     "cantidad_trabajadores": "1-3",
                     "tipo_negocio": "Producto masivo",
                     "sector_economico": "Tecnología",

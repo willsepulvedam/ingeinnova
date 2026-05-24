@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class SectorEmprendimiento(StrEnum):
+class SectorEmprendimiento(str, Enum):
     TECNOLOGIA = "Tecnología / Software"
     GASTRONOMIA = "Gastronomía / Alimentos"
     MODA = "Moda / Textil"

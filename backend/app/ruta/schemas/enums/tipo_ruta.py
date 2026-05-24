@@ -1,6 +1,7 @@
-from enum import StrEnum 
+from enum import Enum
 
-class TipoRutaEnum(StrEnum):
+
+class TipoRutaEnum(str, Enum):
     ACELERACION = "Aceleración"
     INCUBACION = "Incubación"
     MENTORIA = "Mentoría"

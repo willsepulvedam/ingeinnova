@@ -1,6 +1,6 @@
-from enum import StrEnum
+from enum import Enum
 
-class EstadoRutaEnum(StrEnum):
+class EstadoRutaEnum(str,Enum):
     ACTIVA = "Activa"
     INACTIVA = "Inactiva"
     EN_ESPERA = "En Espera"

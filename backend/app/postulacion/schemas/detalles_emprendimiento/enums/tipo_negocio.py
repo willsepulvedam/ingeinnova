@@ -1,6 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
-class TipoEspecificoNegocio(StrEnum): 
+
+class TipoEspecificoNegocio(str, Enum):
     PRODUCTO_MASIVO = "Producto masivo"
     PRODUCTO_NICHO = "Producto de nicho"
     SERVICIOS = "Servicios"

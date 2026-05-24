@@ -14,14 +14,14 @@ class EtapaDetail(EtapaBase, table=False):
             default_factory=list,
             description="Lista de emprendimientos asociados a esta etapa",
         ),
-    ] = []
+    ]
 
     rutas: Annotated[
         list[RutaOut],
         Field(
             default_factory=list, description="Lista de rutas asociadas a esta etapa"
         ),
-    ] = []
+    ]
 
     model_config = SQLModelConfig(
         extra="forbid",
@@ -115,13 +115,13 @@ class EtapaDetail(EtapaBase, table=False):
                     },
                     {
                         "id": "123e4567-e89b-12d3-a456-426614174001",
-                        "estado": "Pendiente",      
+                        "estado": "Pendiente",
                         "fecha_inicio": "2026-09-01T00:00:00Z",
                         "fecha_final": "2026-12-31T23:59:59Z",
                         "tipo": "Incubación",
                         "contenido": "Talleres grupales sobre validación de hipótesis, diseño de modelos de negocio y estrategias de crecimiento.",
                         "entrega": "Plan de validación de hipótesis en formato PDF.",
-                    }
+                    },
                 ],
             }
         },

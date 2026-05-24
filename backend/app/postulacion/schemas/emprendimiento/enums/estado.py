@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class EstadoEmprendimiento(StrEnum):
+class EstadoEmprendimiento(str, Enum):
     IDEA = "Idea / Proyecto"
     PROTOTIPO = "Prototipo"
     EN_MARCHA = "En marcha"

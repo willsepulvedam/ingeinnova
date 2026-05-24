@@ -3,12 +3,10 @@ from collections.abc import Generator
 from sqlmodel import SQLModel, Session, create_engine
 import logging
 
-
 logger = logging.getLogger("ingeinnova.database")
 logging.basicConfig(level=logging.INFO)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-
 
 if not DATABASE_URL: 
     logger.critical("[CONFIG ERROR] La variable de entorno 'DATABASE_URL' no está definida. Verifica tu archivo .env o la configuración de Dcoker")

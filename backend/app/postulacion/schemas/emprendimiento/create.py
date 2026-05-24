@@ -14,7 +14,7 @@ from backend.app.postulacion.schemas.emprendimiento.base import EmprendimientoBa
 class EmprendimientoCreate(EmprendimientoBase, table=False):
     integrantes_ids: Annotated[
         list[uuid.UUID],
-        Field(description="IDs de los emprendedores integrantes del emprendimiento"),
+        Field(default=[],description="IDs de los emprendedores integrantes del emprendimiento"),
     ]
     emprendedor: Annotated[
         EmprendedorCreate,
@@ -41,6 +41,26 @@ class EmprendimientoCreate(EmprendimientoBase, table=False):
                     "123e4567-e89b-12d3-a456-426614174000",
                     "123e4567-e89b-12d3-a456-426614174001",
                 ],
+                "emprendedor": {
+                    "nom_completo": "Juan Pérez",
+                    "cedula": "1005789123",
+                    "email": "juan.perez@unicolombo.edu.co",
+                    "telefono": "+573001234567",
+                    "sexo": "Hombre",  
+                    "edad": 25,
+                    "barrio": "Centro",
+                    "localidad": "1 Localidad Histórica y del Caribe Norte", 
+                    "tipo_vinculo": "Estudiante", 
+                    "password": "MiPasswordSeguro123",
+                    "inf_academica": {
+                        "semestre": "5",  
+                        "programa": "Ingeniería de Sistemas", 
+                        "jornada": "Diurna", 
+                        "ano_graduacion": None
+                    },
+                    "es_emprendedor": True,
+                    "interes_emprender": None
+                },
                 "detalles": {
                     "constituida_legalmente": "No",
                     "nit_empresa": None,

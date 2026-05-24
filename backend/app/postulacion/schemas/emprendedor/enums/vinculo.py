@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class TipoVinculoEmprendedor(StrEnum):
+class TipoVinculoEmprendedor(str, Enum):
     ESTUDIANTE = "Estudiante"
     EGRESADO = "Egresado"
     OTRO = "Otro"

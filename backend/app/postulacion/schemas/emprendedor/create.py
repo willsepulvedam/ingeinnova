@@ -21,6 +21,7 @@ class EmprendedorCreate(EmprendedorBase, table=False):
                 "nom_completo": "Juan Pérez",
                 "cedula": "1005789123",
                 "email": "juan.perez@unicolombo.edu.co",
+                "password": "TuPasswordAqui",
                 "telefono": "+573001234567",
                 "sexo": "Hombre",  
                 "edad": 25,
@@ -29,7 +30,7 @@ class EmprendedorCreate(EmprendedorBase, table=False):
                 "tipo_vinculo": "Estudiante", 
                 "inf_academica": {
                     "semestre": "5",  
-                    "programa": "Ingeniería de Sistemas", 
+                    "programa": "Ingeniería de Sistemas", # Valor 
                     "jornada": "Diurna", 
                     "ano_graduacion": None
                 },

@@ -2,6 +2,7 @@ import uuid
 
 from sqlmodel import Session, select
 
+from backend.app.core.security import hash_password
 from backend.app.postulacion.models.detalles_emprendimiento import (
     Tabla_DetallesEmprendimiento,
 )
@@ -26,17 +27,27 @@ class EmprendimientoRepository:
     ) -> Tabla_Emprendimiento:
 
         try:
-            db_emprendimiento = Tabla_Emprendimiento(**emp_in.model_dump())
+            # 1. Volcar el esquema base (Pydantic convierte automáticamente los (str, Enum) a strings normales)
+            datos_proyecto = emp_in.model_dump(exclude={"emprendedor", "detalles"})
+
+            # 2. Guardar la entidad padre limpia en el VARCHAR de la BD
+            db_emprendimiento = Tabla_Emprendimiento(**datos_proyecto)
             db.add(db_emprendimiento)
             db.flush()
 
+            # 3. Procesar el Emprendedor Líder
             datos_emprendedor = empdor_in.model_dump()
+            password_plana = datos_emprendedor.pop("password", None)
+            if password_plana:
+                datos_emprendedor["password_hash"] = hash_password(password_plana)
+
             db_emprendedor = Tabla_Emprendedor(
                 **datos_emprendedor,
                 emprendimiento_id=db_emprendimiento.emprendimiento_id,
             )
             db.add(db_emprendedor)
 
+            # 4. Procesar los Detalles del proyecto
             datos_detalles = det_in.model_dump()
             db_detalles = Tabla_DetallesEmprendimiento(
                 **datos_detalles, emprendimiento_id=db_emprendimiento.emprendimiento_id
@@ -44,12 +55,31 @@ class EmprendimientoRepository:
             db.add(db_detalles)
             db.flush()
 
+            # 5. Mapear la clave foránea inversa y confirmar la transacción
             db_emprendimiento.detalles_id = db_detalles.emprendimiento_id
             db.add(db_emprendimiento)
 
             db.commit()
             db.refresh(db_emprendimiento)
             return db_emprendimiento
+        except Exception as e:
+            db.rollback()
+            raise e
+
+    def create_only_emprendedor(
+        self, db: Session, empdor_in: EmprendedorCreate
+    ) -> Tabla_Emprendedor:
+        try:
+            datos_emprendedor = empdor_in.model_dump()
+            password_plana = datos_emprendedor.pop("password", None)
+            if password_plana:
+                datos_emprendedor["password_hash"] = hash_password(password_plana)
+
+            db_emprendedor = Tabla_Emprendedor(**datos_emprendedor)
+            db.add(db_emprendedor)
+            db.commit()
+            db.refresh(db_emprendedor)
+            return db_emprendedor
         except Exception as e:
             db.rollback()
             raise e

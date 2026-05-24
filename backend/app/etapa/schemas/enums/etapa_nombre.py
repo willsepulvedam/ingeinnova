@@ -1,6 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
-class NombreEtapaEnum(StrEnum):
+
+class NombreEtapaEnum(str, Enum):
     IDEACION = "Ideación"
     VALIDACION_MERCADO = "Validación de Mercado"
     PROTOIPADO = "Prototipado"
