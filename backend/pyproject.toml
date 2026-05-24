@@ -5,20 +5,32 @@ description = "Servidor de Control y Gestión - INGEINNOVA"
 readme = "README.md"
 requires-python = ">=3.12"
 
-# Dependencias de PRODUCCIÓN (Lo que corre en el servidor)
+
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
     "sqlalchemy",
-    "pydantic>=2.0",
+    "pydantic[email]>=2.0",
     "python-multipart",
     "pydantic-settings",
+    "psycopg[binary]>=3.3.3",
+    "sqlmodel>=0.0.22",  # Movélo para acá
+    "passlib[bcrypt]>=1.7.4",
+    "pydantic-extra-types>=2.11.1",
+    "phonenumbers>=9.0.30",
 ]
 
-# Dependencias de DESARROLLO (Lo que usas para testear)
+
 [dependency-groups]
 dev = [
+    "types-passlib>=1.7.7",
     "pytest>=8.0.0",
     "httpx>=0.28.1",
     "mypy>=1.20.0",
+    "ruff>=0.15.12",
 ]
+
+
+[tool.ruff.per-file-ignores]
+"**/conftest.py" = ["F401"]
+"**/tests/*" = ["F401"]

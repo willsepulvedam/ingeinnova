@@ -13,8 +13,8 @@ RUN uv export --format requirements-txt -o requirements.txt && \
     uv pip install --system -r requirements.txt
 
 
-COPY . .
+COPY . ./backend
 
 EXPOSE 8000
 
-CMD [ "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000" ]
+CMD [ "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
