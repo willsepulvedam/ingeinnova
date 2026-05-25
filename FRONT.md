@@ -313,7 +313,7 @@ frontend/
 |-------|-----------|
 | `ingeinnova_session` | Sesión actual (rol, cédula, emprendimientoId, etc.) |
 | `ingeinnova_usuarios` | Cédulas y datos de personas registradas en inscripciones |
-| `propietario_id` | UUID del propietario al crear emprendimientos |
+| `propietario_id` | UUID del propietario al crear emprendimientos | hola
 
 ---
 
