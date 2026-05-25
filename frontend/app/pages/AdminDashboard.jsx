@@ -9,7 +9,35 @@ const ESTADO_BADGE = {
   INACTIVO: 'bg-gray-100 text-gray-600',
 }
 
-const FORM_VACIO = { nombre: '', descripcion: '', estado: 'ACTIVO' }
+const SECTORES = [
+  'Tecnología / Software',
+  'Gastronomía / Alimentos',
+  'Moda / Textil',
+  'Artesanías / Diseño',
+  'Servicios profesionales',
+  'Educación / EdTech',
+  'Otro',
+]
+
+const ESTADOS_MADUREZ = ['Idea / Proyecto', 'Prototipo', 'En marcha', 'Facturando']
+
+const FORM_VACIO = {
+  // Emprendimiento
+  nombre: '',
+  descripcion: '',
+  sector: 'Tecnología / Software',
+  estadoMaturez: 'Idea / Proyecto',
+  tipoClienteAspira: 'B2C - Consumidor Final (Personas)',
+  
+  // Emprendedor (mínimo)
+  emprendedorNombre: '',
+  emprendedorCedula: '',
+  emprendedorEmail: '',
+  emprendedorTelefono: '',
+  
+  // Estado
+  estado: 'ACTIVO',
+}
 
 function randomUUID() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
@@ -36,7 +64,7 @@ export default function AdminDashboard() {
       setLoading(true)
       setError(null)
       const data = await emprendimientoService.listar()
-      setEmprendimientos(data)
+      setEmprendimientos(Array.isArray(data) ? data : [])
     } catch (e) {
       setError(e.message)
     } finally {
@@ -56,12 +84,21 @@ export default function AdminDashboard() {
 
   const abrirEditar = (emp) => {
     setForm({
-      nombre: emp.nombre,
-      descripcion: emp.descripcion,
-      estado: emp.estado,
+      nombre: emp.nomProyecto || emp.nom_proyecto || emp.nombre || '',
+      descripcion: emp.descripcion || '',
+      sector: emp.sector || 'Tecnología / Software',
+      estadoMaturez: emp.estadoMaturez || emp.estadoMadurez || emp.estado_madurez || 'Idea / Proyecto',
+      tipoClienteAspira:
+        emp.tipoClienteAspira || emp.tipoClienteAspirado || emp.tipo_cliente_aspirado ||
+        'B2C - Consumidor Final (Personas)',
+      emprendedorNombre: emp.emprendedorNombre || '',
+      emprendedorCedula: emp.emprendedorCedula || '',
+      emprendedorEmail: emp.emprendedorEmail || '',
+      emprendedorTelefono: emp.emprendedorTelefono || '',
+      estado: emp.estado || 'ACTIVO',
     })
     setFormError(null)
-    setModal({ tipo: 'editar', id: emp.id })
+    setModal({ tipo: 'editar', id: emp.id || emp.emprendimientoId || emp.emprendimiento_id })
   }
 
   const cerrarModal = () => {
@@ -80,16 +117,59 @@ export default function AdminDashboard() {
     setFormError(null)
     try {
       if (modal === 'crear') {
-        await emprendimientoService.crear({
-          nombre: form.nombre.trim(),
+        // Crear payload completo para POST
+        const payload = {
+          nom_proyecto: form.nombre.trim(),
           descripcion: form.descripcion.trim(),
-          propietario_id: randomUUID(),
-        })
+          sector: form.sector,
+          estado_madurez: form.estadoMaturez,
+          tipo_cliente_aspirado: form.tipoClienteAspira,
+          emprendedor: {
+            nom_completo: form.emprendedorNombre.trim() || 'Admin Creador',
+            cedula: form.emprendedorCedula.trim() || randomUUID().slice(0, 10),
+            email: form.emprendedorEmail.trim() || `admin-${Date.now()}@ingeinnova.local`,
+            telefono: form.emprendedorTelefono.trim() || '+573001234567',
+            sexo: 'Otro',
+            edad: 0,
+            barrio: 'N/A',
+            localidad: '1 Localidad Histórica y del Caribe Norte',
+            tipo_vinculo: 'Administrativo',
+            categoria: 'Administrativo',
+            password: 'Admin123456!',
+            inf_academica: {
+              semestre: 'N/A',
+              programa: 'Administrativo',
+              jornada: 'Diurna',
+              ano_graduacion: null,
+            },
+            es_emprendedor: false,
+          },
+          detalles: {
+            constituida_legalmente: 'No',
+            nit_empresa: null,
+            tiene_rut: 'No tiene',
+            tiene_cvlac: false,
+            tiempo_existencia: 'Menos de 1 año',
+            cantidad_trabajadores: '1-3',
+            tipo_negocio: 'Producto masivo',
+            sector_economico: form.sector,
+            es_familiar: 'No',
+            familia_tiene_empresa: 'No',
+            empresa_familia_legal: 'No',
+            historial_quiebra: false,
+            redes_sociales: null,
+          },
+        }
+
+        await emprendimientoService.crear(payload)
       } else if (modal?.tipo === 'editar') {
+        // Para actualizar, solo los campos mutables
         await emprendimientoService.actualizar(modal.id, {
-          nombre: form.nombre.trim(),
+          nom_proyecto: form.nombre.trim(),
           descripcion: form.descripcion.trim(),
-          estado: form.estado,
+          sector: form.sector,
+          estado_madurez: form.estadoMaturez,
+          tipo_cliente_aspirado: form.tipoClienteAspira,
         })
       }
       cerrarModal()
@@ -155,21 +235,26 @@ export default function AdminDashboard() {
                   <th className="text-left px-5 py-3 font-semibold text-gray-700 hidden md:table-cell">
                     Descripción
                   </th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-700">Estado</th>
+                  <th className="text-left px-5 py-3 font-semibold text-gray-700">Sector</th>
                   <th className="text-left px-5 py-3 font-semibold text-gray-700 hidden sm:table-cell">
-                    Fecha
+                    Estado
                   </th>
                   <th className="text-right px-5 py-3 font-semibold text-gray-700">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {emprendimientos.map((emp) => (
-                  <tr key={emp.id} className="table-row-animated">
-                    <td className="px-5 py-4 font-medium text-gray-900">{emp.nombre}</td>
+                  <tr key={emp.id || emp.emprendimiento_id} className="table-row-animated">
+                    <td className="px-5 py-4 font-medium text-gray-900">
+                      {emp.nomProyecto || emp.nom_proyecto || emp.nombre}
+                    </td>
                     <td className="px-5 py-4 text-gray-600 hidden md:table-cell max-w-xs truncate">
                       {emp.descripcion}
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-5 py-4 text-gray-700 text-sm">
+                      {emp.sector || 'N/A'}
+                    </td>
+                    <td className="px-5 py-4 hidden sm:table-cell">
                       <span
                         className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                           ESTADO_BADGE[emp.estado] ?? ESTADO_BADGE.INACTIVO
@@ -178,18 +263,15 @@ export default function AdminDashboard() {
                         {emp.estado}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-gray-500 hidden sm:table-cell">
-                      {new Date(emp.fecha_creacion).toLocaleDateString('es-CO')}
-                    </td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-2 flex-wrap">
-                        <Link to={`/admin/emprendimiento/${emp.id}`}>
+                        <Link to={`/admin/emprendimiento/${emp.id || emp.emprendimientoId || emp.emprendimiento_id}`}>
                           <ButtonSmall>Seguimiento</ButtonSmall>
                         </Link>
                         <ButtonSmall onClick={() => abrirEditar(emp)}>Editar</ButtonSmall>
                         <ButtonDanger
                           className="!px-3 !py-2 !text-sm !rounded-lg"
-                          onClick={() => setEliminarId(emp.id)}
+                          onClick={() => setEliminarId(emp.id || emp.emprendimientoId || emp.emprendimiento_id)}
                         >
                           Eliminar
                         </ButtonDanger>
@@ -206,7 +288,7 @@ export default function AdminDashboard() {
       <Modal
         open={!!modal}
         onClose={cerrarModal}
-        size="sm"
+        size="md"
         align="center"
         zIndex={50}
         ariaLabel={modal === 'crear' ? 'Nuevo emprendimiento' : 'Editar emprendimiento'}
@@ -217,55 +299,145 @@ export default function AdminDashboard() {
             {modal === 'crear' ? 'Nuevo emprendimiento' : 'Editar emprendimiento'}
           </h2>
           <form onSubmit={handleGuardar} className="space-y-4">
+            {/* EMPRENDIMIENTO */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nombre del proyecto <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.nombre}
+                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                maxLength={255}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Descripción <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={form.descripcion}
+                onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+                rows={3}
+                maxLength={1000}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre <span className="text-red-500">*</span>
+                  Sector <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={form.sector}
+                  onChange={(e) => setForm({ ...form, sector: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {SECTORES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Estado de madurez <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={form.estadoMaturez}
+                  onChange={(e) => setForm({ ...form, estadoMaturez: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {ESTADOS_MADUREZ.map((e) => (
+                    <option key={e} value={e}>
+                      {e}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* EMPRENDEDOR MÍNIMO */}
+            <div className="pt-4 border-t border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-3">Datos del emprendedor</h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre completo
                 </label>
                 <input
                   type="text"
-                  value={form.nombre}
-                  onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                  maxLength={100}
+                  value={form.emprendedorNombre}
+                  onChange={(e) => setForm({ ...form, emprendedorNombre: e.target.value })}
+                  placeholder="Opcional"
+                  maxLength={255}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <div>
+
+              <div className="grid sm:grid-cols-2 gap-4 mt-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cédula
+                  </label>
+                  <input
+                    type="text"
+                    value={form.emprendedorCedula}
+                    onChange={(e) =>
+                      setForm({ ...form, emprendedorCedula: e.target.value.replace(/\D/g, '') })
+                    }
+                    placeholder="Opcional"
+                    maxLength={12}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={form.emprendedorEmail}
+                    onChange={(e) => setForm({ ...form, emprendedorEmail: e.target.value })}
+                    placeholder="Opcional"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descripción <span className="text-red-500">*</span>
+                  Teléfono
                 </label>
-                <textarea
-                  value={form.descripcion}
-                  onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-                  rows={3}
-                  maxLength={500}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                <input
+                  type="tel"
+                  value={form.emprendedorTelefono}
+                  onChange={(e) => setForm({ ...form, emprendedorTelefono: e.target.value })}
+                  placeholder="Opcional"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              {modal !== 'crear' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                  <select
-                    value={form.estado}
-                    onChange={(e) => setForm({ ...form, estado: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="ACTIVO">ACTIVO</option>
-                    <option value="INACTIVO">INACTIVO</option>
-                  </select>
-                </div>
-              )}
-              {formError && (
-                <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{formError}</p>
-              )}
-              <div className="flex gap-3 pt-2">
-                <ButtonPrimary type="submit" disabled={guardando} className="flex-1">
-                  {guardando ? 'Guardando...' : 'Guardar'}
-                </ButtonPrimary>
-                <ButtonSecondary type="button" onClick={cerrarModal} className="flex-1">
-                  Cancelar
-                </ButtonSecondary>
-              </div>
-            </form>
+            </div>
+
+            {formError && (
+              <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{formError}</p>
+            )}
+
+            <div className="flex gap-3 pt-2 border-t border-gray-200">
+              <ButtonPrimary type="submit" disabled={guardando} className="flex-1">
+                {guardando ? 'Guardando...' : 'Guardar'}
+              </ButtonPrimary>
+              <ButtonSecondary type="button" onClick={cerrarModal} className="flex-1">
+                Cancelar
+              </ButtonSecondary>
+            </div>
+          </form>
         </div>
       </Modal>
 
@@ -277,21 +449,21 @@ export default function AdminDashboard() {
         zIndex={50}
         ariaLabel="Confirmar eliminación"
       >
-          <div className="relative p-6 md:p-8 text-center">
-            <ModalCloseButton onClick={() => setEliminarId(null)} />
-            <p className="text-lg font-semibold text-gray-900 mb-2 pr-8">¿Eliminar emprendimiento?</p>
-            <p className="text-gray-600 text-sm mb-6">
-              Se eliminará permanentemente junto con su ruta y etapas asociadas.
-            </p>
-            <div className="flex gap-3">
-              <ButtonDanger className="flex-1" disabled={eliminando} onClick={handleEliminar}>
-                {eliminando ? 'Eliminando...' : 'Sí, eliminar'}
-              </ButtonDanger>
-              <ButtonSecondary className="flex-1" onClick={() => setEliminarId(null)}>
-                Cancelar
-              </ButtonSecondary>
-            </div>
+        <div className="relative p-6 md:p-8 text-center">
+          <ModalCloseButton onClick={() => setEliminarId(null)} />
+          <p className="text-lg font-semibold text-gray-900 mb-2 pr-8">¿Eliminar emprendimiento?</p>
+          <p className="text-gray-600 text-sm mb-6">
+            Se eliminará permanentemente junto con su ruta y etapas asociadas.
+          </p>
+          <div className="flex gap-3">
+            <ButtonDanger className="flex-1" disabled={eliminando} onClick={handleEliminar}>
+              {eliminando ? 'Eliminando...' : 'Sí, eliminar'}
+            </ButtonDanger>
+            <ButtonSecondary className="flex-1" onClick={() => setEliminarId(null)}>
+              Cancelar
+            </ButtonSecondary>
           </div>
+        </div>
       </Modal>
     </div>
   )

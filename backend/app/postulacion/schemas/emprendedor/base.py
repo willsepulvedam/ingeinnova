@@ -56,6 +56,28 @@ class EmprendedorBase(SQLModel, table=False):
 
         return v
 
+    @field_validator("telefono", mode="before")
+    @classmethod
+    def normalizar_telefono(cls, v: str) -> str:
+        telefono_bruto = str(v).strip()
+        digitos = re.sub(r"\D", "", telefono_bruto)
+
+        if digitos.startswith("57"):
+            return f"+{digitos}"
+
+        return f"+57{digitos}"
+
+    @field_validator("interes_emprender", mode="before")
+    @classmethod
+    def normalizar_interes_emprender(cls, v):
+        if isinstance(v, bool):
+            return "Sí" if v else "No"
+
+        if isinstance(v, str):
+            return v.strip() or None
+
+        return v
+
     @field_validator("cedula")
     @classmethod
     def validar_documento_generico(cls, v: str) -> str:

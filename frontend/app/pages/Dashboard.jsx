@@ -2,36 +2,21 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { emprendimientoService } from '../services/EmprendimientoService'
 import { getSession } from '../services/authService'
-import { rutaService } from '../services/RutaService'
-import { etapaService } from '../services/EtapaService'
-
-const ESTADO_COLOR = {
-  COMPLETADA: { badge: 'bg-green-100 text-green-700', icon: '✅' },
-  EN_PROGRESO: { badge: 'bg-blue-100 text-blue-700', icon: '🔵' },
-  BLOQUEADA: { badge: 'bg-gray-100 text-gray-500', icon: '🔒' },
-}
 
 export default function Dashboard() {
   const [emprendimiento, setEmprendimiento] = useState(null)
-  const [ruta, setRuta] = useState(null)
-  const [etapas, setEtapas] = useState([])
-  const [progreso, setProgreso] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [avanzando, setAvanzando] = useState(false)
-  const [avanceMsg, setAvanceMsg] = useState(null)
 
   const cargarEmprendimiento = useCallback(async (id) => {
-    const [emp, rut, etps] = await Promise.all([
-      emprendimientoService.obtener(id),
-      rutaService.obtenerPorEmprendimiento(id),
-      etapaService.listarPorEmprendimiento(id),
-    ])
-    setEmprendimiento(emp)
-    setRuta(rut)
-    setEtapas([...etps].sort((a, b) => a.orden - b.orden))
-    const prog = await rutaService.obtenerProgreso(rut.id)
-    setProgreso(prog)
+    try {
+      const emp = await emprendimientoService.obtener(id)
+      setEmprendimiento(emp)
+      // Solo cargar rutas y etapas si existen endpoints que los soporten
+      // Por ahora, simplemente mostramos el emprendimiento
+    } catch (e) {
+      throw e
+    }
   }, [])
 
   const cargar = useCallback(async () => {
@@ -59,24 +44,6 @@ export default function Dashboard() {
   useEffect(() => {
     cargar()
   }, [cargar])
-
-  const handleAvanzar = async () => {
-    if (!ruta) return
-    setAvanzando(true)
-    setAvanceMsg(null)
-    try {
-      await rutaService.avanzar(ruta.id)
-      setAvanceMsg({ tipo: 'ok', texto: '¡Etapa completada! Se ha avanzado a la siguiente.' })
-      await cargar()
-    } catch (e) {
-      setAvanceMsg({ tipo: 'error', texto: e.message })
-    } finally {
-      setAvanzando(false)
-    }
-  }
-
-  const etapaEnProgreso = etapas.find((e) => e.estado === 'EN_PROGRESO')
-  const todasCompletadas = etapas.length > 0 && etapas.every((e) => e.estado === 'COMPLETADA')
 
   if (loading) {
     return (
@@ -133,22 +100,16 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="text-xl font-bold text-gray-900">{emprendimiento.nombre}</h3>
+              <h3 className="text-xl font-bold text-gray-900">{emprendimiento.nomProyecto}</h3>
               <p className="text-gray-600 mt-2">{emprendimiento.descripcion}</p>
             </div>
             <span
-              className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${
-                emprendimiento.estado === 'ACTIVO'
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-500'
-              }`}
+              className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 bg-blue-100 text-blue-700`}
             >
-              {emprendimiento.estado}
+              Activo
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-4">
-            Registrado: {new Date(emprendimiento.fecha_creacion).toLocaleDateString('es-CO')}
-          </p>
+          <p className="text-xs text-gray-400 mt-4">ID: {emprendimiento.id}</p>
           <Link
             to={`/emprendimiento/${emprendimiento.id}`}
             className="inline-block mt-4 text-sm text-blue-600 hover:underline"
@@ -159,95 +120,18 @@ export default function Dashboard() {
       </section>
 
       {/* Progreso */}
-      {progreso && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5 mb-8 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Progreso de la ruta</span>
-            <span className="text-sm font-bold text-blue-600">
-              {progreso.progreso?.toFixed(0) ?? 0}%
-            </span>
-          </div>
-          <div className="w-full bg-gray-100 rounded-full h-3">
-            <div
-              className="bg-blue-500 h-3 rounded-full progress-bar-animated"
-              style={{ width: `${progreso.progreso ?? 0}%` }}
-            />
-          </div>
-          <p className="text-xs text-gray-400 mt-2">
-            {progreso.etapas_completadas} de {progreso.total_etapas} etapas completadas
-          </p>
-        </div>
-      )}
+      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-8 shadow-sm">
+        <p className="text-sm text-gray-600">
+          Tu ruta de emprendimiento te guiará a través de 4 etapas estratégicas. Más información próximamente.
+        </p>
+      </div>
 
-      {/* Etapas */}
-      <section aria-labelledby="etapas-heading">
-        <h2 id="etapas-heading" className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <span>📋</span> Mis etapas
-        </h2>
-        <div className="space-y-3 mb-6">
-          {etapas.map((etapa) => {
-            const colors = ESTADO_COLOR[etapa.estado] ?? ESTADO_COLOR.BLOQUEADA
-            return (
-              <div
-                key={etapa.id}
-                className={`card-hover bg-white border rounded-xl p-5 shadow-sm transition ${
-                  etapa.estado === 'EN_PROGRESO'
-                    ? 'border-blue-300 ring-1 ring-blue-200'
-                    : 'border-gray-200'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{colors.icon}</span>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        Etapa {etapa.orden}: {etapa.nombre}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-0.5">{etapa.descripcion}</p>
-                    </div>
-                  </div>
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${colors.badge}`}>
-                    {etapa.estado.replace('_', ' ')}
-                  </span>
-                </div>
-                {etapa.fecha_completada && (
-                  <p className="text-xs text-gray-400 mt-3">
-                    Completada: {new Date(etapa.fecha_completada).toLocaleDateString('es-CO')}
-                  </p>
-                )}
-              </div>
-            )
-          })}
-        </div>
-
-        {avanceMsg && (
-          <div
-            className={`p-4 rounded-xl mb-4 text-sm ${
-              avanceMsg.tipo === 'ok' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-            }`}
-          >
-            {avanceMsg.texto}
-          </div>
-        )}
-
-        {todasCompletadas ? (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-5 text-center">
-            <div className="text-3xl mb-2">🎉</div>
-            <p className="font-semibold text-green-700">¡Felicitaciones! Todas las etapas completadas.</p>
-          </div>
-        ) : etapaEnProgreso ? (
-          <button
-            type="button"
-            onClick={handleAvanzar}
-            disabled={avanzando}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-3 rounded-xl font-semibold transition"
-          >
-            {avanzando
-              ? 'Avanzando...'
-              : `Completar "${etapaEnProgreso.nombre}" y avanzar →`}
-          </button>
-        ) : null}
-      </section>
+      {/* Información complementaria */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+        <p className="text-sm text-blue-800">
+          <strong>✓ ¡Bienvenido a INGEINNOVA!</strong> Tu emprendimiento ha sido registrado correctamente. Podrás ver más detalles y realizar seguimiento de tu ruta en próximas actualizaciones.
+        </p>
+      </div>
     </div>
   )
 }

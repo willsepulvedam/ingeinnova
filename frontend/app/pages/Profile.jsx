@@ -2,11 +2,9 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { emprendimientoService } from '../services/EmprendimientoService'
 import { getSession } from '../services/authService'
-import { rutaService } from '../services/RutaService'
 
 export default function Profile() {
   const [emprendimiento, setEmprendimiento] = useState(null)
-  const [ruta, setRuta] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -27,8 +25,6 @@ export default function Profile() {
           emp = lista[0]
         }
         setEmprendimiento(emp)
-        const rut = await rutaService.obtenerPorEmprendimiento(emp.id)
-        setRuta(rut)
       } catch (e) {
         setError(e.message)
       } finally {
@@ -65,35 +61,34 @@ export default function Profile() {
     <div className="container mx-auto px-4 md:px-8 py-8 max-w-3xl">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Perfil del emprendimiento</h1>
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">{emprendimiento.nombre}</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-2">{emprendimiento.nomProyecto}</h2>
         <p className="text-gray-600 mb-6">{emprendimiento.descripcion}</p>
 
         <dl className="grid gap-4 sm:grid-cols-2 text-sm">
           <div>
-            <dt className="text-gray-500 font-medium">Estado</dt>
-            <dd className="text-gray-900 mt-1">{emprendimiento.estado}</dd>
+            <dt className="text-gray-500 font-medium">Sector</dt>
+            <dd className="text-gray-900 mt-1">{emprendimiento.sector}</dd>
           </div>
           <div>
-            <dt className="text-gray-500 font-medium">Fecha de registro</dt>
-            <dd className="text-gray-900 mt-1">
-              {new Date(emprendimiento.fecha_creacion).toLocaleDateString('es-CO')}
-            </dd>
+            <dt className="text-gray-500 font-medium">Cliente aspirado</dt>
+            <dd className="text-gray-900 mt-1">{emprendimiento.tipoClienteAspirado}</dd>
           </div>
-          {ruta && (
-            <>
-              <div>
-                <dt className="text-gray-500 font-medium">Etapa actual de la ruta</dt>
-                <dd className="text-gray-900 mt-1">{ruta.etapa_actual}</dd>
-              </div>
-              <div>
-                <dt className="text-gray-500 font-medium">Inicio de ruta</dt>
-                <dd className="text-gray-900 mt-1">
-                  {new Date(ruta.fecha_inicio).toLocaleDateString('es-CO')}
-                </dd>
-              </div>
-            </>
-          )}
+          <div>
+            <dt className="text-gray-500 font-medium">ID del emprendimiento</dt>
+            <dd className="text-gray-900 mt-1 font-mono text-xs">{emprendimiento.id}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500 font-medium">Estado</dt>
+            <dd className="text-gray-900 mt-1">Activo</dd>
+          </div>
         </dl>
+
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>✓ Información actualizada</strong><br/>
+            Tu perfil se ha creado exitosamente. Acceso a etapas y progreso disponible próximamente.
+          </p>
+        </div>
 
         <Link
           to="/dashboard"

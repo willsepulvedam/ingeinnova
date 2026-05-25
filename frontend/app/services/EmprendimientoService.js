@@ -1,23 +1,23 @@
 import { fetcher } from './api'
 
 export const emprendimientoService = {
-  /** Crea un emprendimiento. El back crea automáticamente la ruta y las 4 etapas. */
+  /** Crea un emprendimiento. El back retorna { success, data } con el emprendimiento creado */
   crear: (data) =>
-    fetcher('/emprendimiento/', {
+    fetcher('/api/v1/postulaciones', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  listar: () => fetcher('/emprendimiento/'),
+  listar: () => fetcher('/api/v1/postulaciones'),
 
-  obtener: (id) => fetcher(`/emprendimiento/${id}`),
+  obtener: (id) => fetcher(`/api/v1/postulaciones/${id}`),
 
   actualizar: (id, data) =>
-    fetcher(`/emprendimiento/${id}`, {
+    fetcher(`/api/v1/postulaciones/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
   eliminar: (id) =>
-    fetcher(`/emprendimiento/${id}`, { method: 'DELETE' }),
+    fetcher(`/api/v1/postulaciones/${id}`, { method: 'DELETE' }),
 }
